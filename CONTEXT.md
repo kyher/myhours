@@ -1,5 +1,8 @@
 # MyHours – Domain Glossary
 
+## MyHours (product)
+A tool for teams with varied working hours. Team members publish their Schedule at a public Profile URL so colleagues can check when someone is available without having to ask. Applicable to any team — not limited to remote or freelance contexts.
+
 ## User
 A registered account identified by a unique UUID. Created via email + password registration. Has a unique `username` chosen at sign-up that appears in their public Profile URL.
 
