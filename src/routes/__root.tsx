@@ -41,36 +41,45 @@ function RootComponent() {
 
   return (
     <>
-      <nav className="flex items-center gap-4 border-b px-8 py-3 text-sm">
-        <Link to="/" className="font-semibold">
+      <nav className="flex items-center gap-4 border-b border-zinc-800 bg-zinc-950 px-8 py-4 text-sm text-zinc-50">
+        <Link to="/" className="font-semibold text-emerald-500">
           MyHours
         </Link>
         <div className="ml-auto flex items-center gap-4">
           {session ? (
             <>
-              <Link to="/settings" className="hover:underline">
+              <Link
+                to="/settings"
+                className="text-zinc-400 transition-colors hover:text-zinc-50"
+              >
                 Settings
               </Link>
               <Link
                 to="/profile/$username"
                 params={{ username: session.user.username ?? '' }}
-                className="hover:underline"
+                className="text-zinc-400 transition-colors hover:text-zinc-50"
               >
                 My Profile
               </Link>
               <button
                 onClick={() => authClient.signOut()}
-                className="hover:underline"
+                className="text-zinc-400 transition-colors hover:text-zinc-50"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:underline">
-                Login
+              <Link
+                to="/login"
+                className="text-zinc-400 transition-colors hover:text-zinc-50"
+              >
+                Log in
               </Link>
-              <Link to="/register" className="hover:underline">
+              <Link
+                to="/register"
+                className="rounded-md bg-emerald-500 px-3 py-1.5 font-semibold text-zinc-950 transition-colors hover:bg-emerald-400"
+              >
                 Register
               </Link>
             </>
