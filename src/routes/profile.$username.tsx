@@ -49,7 +49,10 @@ export const Route = createFileRoute('/profile/$username')({
 function ProfilePage() {
   const { profile, schedule: scheduleRows } = Route.useLoaderData()
 
-  const sorted = [...scheduleRows].sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
+  const sorted = [...scheduleRows].sort(
+    (a, b) => DAY_ORDER.indexOf(a.dayOfWeek) - DAY_ORDER.indexOf(b.dayOfWeek),
+  )
 
   return (
     <div className="mx-auto mt-16 max-w-lg px-4">
