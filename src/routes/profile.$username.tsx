@@ -1,9 +1,10 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { eq, gte, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 import { db } from '#/db'
-import { user, schedule, scheduleException } from '#/db/schema'
+import { user, schedule } from '#/db/schema'
+import { getUpcomingExceptions } from '#/db/exceptions'
 
 const DAY_NAMES = [
   'Sunday',
@@ -29,12 +30,7 @@ const getProfile = createServerFn({ method: 'GET' })
       .from(schedule)
       .where(eq(schedule.userId, profile.id))
 
-    const today = new Date().toISOString().slice(0, 10)
-    const exceptions = await db
-      .select()
-      .from(scheduleException)
-      .where(and(eq(scheduleException.userId, profile.id), gte(scheduleException.date, today)))
-      .orderBy(scheduleException.date)
+    const exceptions = await getUpcomingExceptions(db, profile.id)
 
     return { profile, schedule: scheduleRows, exceptions }
   })

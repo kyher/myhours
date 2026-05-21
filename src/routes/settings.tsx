@@ -1,117 +1,65 @@
 import { createFileRoute, redirect, Link, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
-import { eq, gte, and } from 'drizzle-orm'
-
 import { auth } from '#/lib/auth'
 import { authClient } from '#/lib/auth-client'
 import { getRequest } from '@tanstack/react-start/server'
 import { db } from '#/db'
-import { schedule, scheduleException } from '#/db/schema'
+import { schedule } from '#/db/schema'
+import {
+  getUpcomingExceptions,
+  upsertException,
+  deleteException,
+  type ExceptionInput,
+} from '#/db/exceptions'
+import { getSchedule, upsertScheduleRows, type ScheduleRowInput } from '#/db/schedule'
 
-type ScheduleRow = {
-  dayOfWeek: number
-  startTime: string
-  endTime: string
-  isWorking: boolean
-}
-
-type ExceptionInput = {
-  date: string
-  isWorking: boolean
-  startTime: string | null
-  endTime: string | null
-}
+type ScheduleRow = ScheduleRowInput
 
 const getSession = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getRequest()
   return await auth.api.getSession({ headers: request.headers })
 })
 
-const getSchedule = createServerFn({ method: 'GET' }).handler(async () => {
+const getScheduleFn = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getRequest()
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session) return []
-  return await db.select().from(schedule).where(eq(schedule.userId, session.user.id))
+  return await getSchedule(db, session.user.id)
 })
 
-const getExceptions = createServerFn({ method: 'GET' }).handler(async () => {
+const getExceptionsFn = createServerFn({ method: 'GET' }).handler(async () => {
   const request = getRequest()
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session) return []
-  const today = new Date().toISOString().slice(0, 10)
-  return await db
-    .select()
-    .from(scheduleException)
-    .where(and(eq(scheduleException.userId, session.user.id), gte(scheduleException.date, today)))
-    .orderBy(scheduleException.date)
+  return await getUpcomingExceptions(db, session.user.id)
 })
 
-const saveSchedule = createServerFn({ method: 'POST' })
+const saveScheduleFn = createServerFn({ method: 'POST' })
   .inputValidator((data: ScheduleRow[]) => data)
   .handler(async ({ data: rows }) => {
     const request = getRequest()
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session) throw new Error('Unauthorized')
-
-    for (const row of rows) {
-      await db
-        .insert(schedule)
-        .values({
-          id: crypto.randomUUID(),
-          userId: session.user.id,
-          dayOfWeek: row.dayOfWeek,
-          startTime: row.startTime,
-          endTime: row.endTime,
-          isWorking: row.isWorking,
-        })
-        .onConflictDoUpdate({
-          target: [schedule.userId, schedule.dayOfWeek],
-          set: {
-            startTime: row.startTime,
-            endTime: row.endTime,
-            isWorking: row.isWorking,
-          },
-        })
-    }
+    await upsertScheduleRows(db, session.user.id, rows)
   })
 
-const saveException = createServerFn({ method: 'POST' })
+const saveExceptionFn = createServerFn({ method: 'POST' })
   .inputValidator((data: ExceptionInput) => data)
   .handler(async ({ data }) => {
     const request = getRequest()
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session) throw new Error('Unauthorized')
-
-    await db
-      .insert(scheduleException)
-      .values({
-        id: crypto.randomUUID(),
-        userId: session.user.id,
-        date: data.date,
-        isWorking: data.isWorking,
-        startTime: data.startTime,
-        endTime: data.endTime,
-      })
-      .onConflictDoUpdate({
-        target: [scheduleException.userId, scheduleException.date],
-        set: {
-          isWorking: data.isWorking,
-          startTime: data.startTime,
-          endTime: data.endTime,
-        },
-      })
+    await upsertException(db, session.user.id, data)
   })
 
-const removeException = createServerFn({ method: 'POST' })
+const removeExceptionFn = createServerFn({ method: 'POST' })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }) => {
     const request = getRequest()
     const session = await auth.api.getSession({ headers: request.headers })
     if (!session) throw new Error('Unauthorized')
-    await db
-      .delete(scheduleException)
-      .where(and(eq(scheduleException.id, id), eq(scheduleException.userId, session.user.id)))
+    await deleteException(db, session.user.id, id)
   })
 
 export const Route = createFileRoute('/settings')({
@@ -121,8 +69,8 @@ export const Route = createFileRoute('/settings')({
     return { session }
   },
   loader: async () => ({
-    scheduleRows: await getSchedule(),
-    exceptionRows: await getExceptions(),
+    scheduleRows: await getScheduleFn(),
+    exceptionRows: await getExceptionsFn(),
   }),
   component: SettingsPage,
 })
@@ -169,7 +117,7 @@ function SettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await saveSchedule({ data: rows })
+      await saveScheduleFn({ data: rows })
       setSaved(true)
     } finally {
       setSaving(false)
@@ -180,7 +128,7 @@ function SettingsPage() {
     if (!newDate) return
     setAddingException(true)
     try {
-      await saveException({
+      await saveExceptionFn({
         data: {
           date: newDate,
           isWorking: newIsWorking,
@@ -199,7 +147,7 @@ function SettingsPage() {
   }
 
   const handleDeleteException = async (id: string) => {
-    await removeException({ data: id })
+    await removeExceptionFn({ data: id })
     await router.invalidate()
   }
 
