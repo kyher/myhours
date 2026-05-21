@@ -1,9 +1,9 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
+import { eq, gte, and } from 'drizzle-orm'
 
 import { db } from '#/db'
-import { user, schedule } from '#/db/schema'
+import { user, schedule, scheduleException } from '#/db/schema'
 
 const DAY_NAMES = [
   'Sunday',
@@ -29,7 +29,14 @@ const getProfile = createServerFn({ method: 'GET' })
       .from(schedule)
       .where(eq(schedule.userId, profile.id))
 
-    return { profile, schedule: scheduleRows }
+    const today = new Date().toISOString().slice(0, 10)
+    const exceptions = await db
+      .select()
+      .from(scheduleException)
+      .where(and(eq(scheduleException.userId, profile.id), gte(scheduleException.date, today)))
+      .orderBy(scheduleException.date)
+
+    return { profile, schedule: scheduleRows, exceptions }
   })
 
 export const Route = createFileRoute('/profile/$username')({
@@ -46,8 +53,14 @@ export const Route = createFileRoute('/profile/$username')({
   ),
 })
 
+function formatExceptionDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const d = new Date(year, month - 1, day)
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
 function ProfilePage() {
-  const { profile, schedule: scheduleRows } = Route.useLoaderData()
+  const { profile, schedule: scheduleRows, exceptions } = Route.useLoaderData()
 
   const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
   const sorted = [...scheduleRows].sort(
@@ -80,6 +93,30 @@ function ProfilePage() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {exceptions.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-4 text-lg font-semibold">Upcoming exceptions</h2>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-gray-500">
+                <th className="pb-2 font-medium">Date</th>
+                <th className="pb-2 font-medium">Hours</th>
+              </tr>
+            </thead>
+            <tbody>
+              {exceptions.map((ex) => (
+                <tr key={ex.id} className="border-b last:border-0">
+                  <td className="py-2">{formatExceptionDate(ex.date)}</td>
+                  <td className="py-2">
+                    {ex.isWorking ? `${ex.startTime} – ${ex.endTime}` : 'Off'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )
