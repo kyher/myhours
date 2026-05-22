@@ -8,7 +8,7 @@ const USER_B = 'user-b'
 let db: TestDb
 
 beforeEach(async () => {
-  db = createTestDb()
+  db = await createTestDb()
   await insertTestUser(db, USER_A)
   await insertTestUser(db, USER_B)
 })
