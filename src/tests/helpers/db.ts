@@ -1,28 +1,38 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
-import { resolve } from 'path'
-import { fileURLToPath } from 'url'
-import * as schema from '#/db/schema.ts'
+import { PrismaClient } from '@prisma/client'
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 
-const migrationsFolder = resolve(fileURLToPath(new URL('../../../drizzle', import.meta.url)))
+let prisma: PrismaClient | undefined
 
-export function createTestDb() {
-  const sqlite = new Database(':memory:')
-  const db = drizzle(sqlite, { schema })
-  migrate(db, { migrationsFolder })
+function getClient(): PrismaClient {
+  if (!prisma) {
+    const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! })
+    prisma = new PrismaClient({ adapter })
+  }
+  return prisma
+}
+
+export type TestDb = PrismaClient
+
+export async function createTestDb(): Promise<TestDb> {
+  const db = getClient()
+  await db.scheduleException.deleteMany()
+  await db.schedule.deleteMany()
+  await db.session.deleteMany()
+  await db.account.deleteMany()
+  await db.verification.deleteMany()
+  await db.user.deleteMany()
   return db
 }
 
-export type TestDb = ReturnType<typeof createTestDb>
-
 export async function insertTestUser(db: TestDb, id: string) {
-  await db.insert(schema.user).values({
-    id,
-    name: 'Test User',
-    email: `${id}@test.com`,
-    emailVerified: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  await db.user.create({
+    data: {
+      id,
+      name: 'Test User',
+      email: `${id}@test.com`,
+      emailVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
   })
 }

@@ -12,5 +12,10 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    fileParallelism: false,
+    setupFiles: ['./src/tests/helpers/setup.ts'],
+    env: {
+      DATABASE_URL: 'file:test.db',
+    },
   },
 })

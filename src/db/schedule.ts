@@ -1,9 +1,4 @@
-import { eq } from 'drizzle-orm'
-import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
-import { schedule } from './schema.ts'
-import type * as schema from './schema.ts'
-
-type Db = BetterSQLite3Database<typeof schema>
+import type { PrismaClient } from '@prisma/client'
 
 export type ScheduleRowInput = {
   dayOfWeek: number
@@ -12,29 +7,16 @@ export type ScheduleRowInput = {
   isWorking: boolean
 }
 
-export function getSchedule(db: Db, userId: string) {
-  return db.select().from(schedule).where(eq(schedule.userId, userId))
+export function getSchedule(db: PrismaClient, userId: string) {
+  return db.schedule.findMany({ where: { userId } })
 }
 
-export async function upsertScheduleRows(db: Db, userId: string, rows: ScheduleRowInput[]) {
+export async function upsertScheduleRows(db: PrismaClient, userId: string, rows: ScheduleRowInput[]) {
   for (const row of rows) {
-    await db
-      .insert(schedule)
-      .values({
-        id: crypto.randomUUID(),
-        userId,
-        dayOfWeek: row.dayOfWeek,
-        startTime: row.startTime,
-        endTime: row.endTime,
-        isWorking: row.isWorking,
-      })
-      .onConflictDoUpdate({
-        target: [schedule.userId, schedule.dayOfWeek],
-        set: {
-          startTime: row.startTime,
-          endTime: row.endTime,
-          isWorking: row.isWorking,
-        },
-      })
+    await db.schedule.upsert({
+      where: { userId_dayOfWeek: { userId, dayOfWeek: row.dayOfWeek } },
+      create: { userId, dayOfWeek: row.dayOfWeek, startTime: row.startTime, endTime: row.endTime, isWorking: row.isWorking },
+      update: { startTime: row.startTime, endTime: row.endTime, isWorking: row.isWorking },
+    })
   }
 }

@@ -5,7 +5,7 @@ import { auth } from '#/lib/auth'
 import { authClient } from '#/lib/auth-client'
 import { getRequest } from '@tanstack/react-start/server'
 import { db } from '#/db'
-import { schedule } from '#/db/schema'
+import type { Schedule } from '@prisma/client'
 import {
   getUpcomingExceptions,
   upsertException,
@@ -78,7 +78,7 @@ export const Route = createFileRoute('/settings')({
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function buildInitialRows(dbRows: (typeof schedule.$inferSelect)[]): ScheduleRow[] {
+function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
   const byDay = Object.fromEntries(dbRows.map((r) => [r.dayOfWeek, r]))
   return DAY_ORDER.map((day) => ({
     dayOfWeek: day,
