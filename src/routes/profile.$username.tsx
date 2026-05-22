@@ -1,9 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
 
 import { db } from '#/db'
-import { user, schedule } from '#/db/schema'
 import { getUpcomingExceptions } from '#/db/exceptions'
 
 const DAY_NAMES = [
@@ -19,17 +17,10 @@ const DAY_NAMES = [
 const getProfile = createServerFn({ method: 'GET' })
   .inputValidator((username: string) => username)
   .handler(async ({ data: username }) => {
-    const [profile] = await db
-      .select()
-      .from(user)
-      .where(eq(user.username, username))
+    const profile = await db.user.findUnique({ where: { username } })
     if (!profile) return null
 
-    const scheduleRows = await db
-      .select()
-      .from(schedule)
-      .where(eq(schedule.userId, profile.id))
-
+    const scheduleRows = await db.schedule.findMany({ where: { userId: profile.id } })
     const exceptions = await getUpcomingExceptions(db, profile.id)
 
     return { profile, schedule: scheduleRows, exceptions }
