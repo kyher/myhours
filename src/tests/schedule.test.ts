@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createTestDb, insertTestUser, type TestDb } from './helpers/db.ts'
+import { createTestDb, insertTestUser  } from './helpers/db.ts'
+import type {TestDb} from './helpers/db.ts';
 import { getSchedule, upsertScheduleRows } from '#/db/schedule.ts'
 
 const USER_A = 'user-a'
@@ -26,7 +27,7 @@ describe('getSchedule', () => {
     expect(rows.every((r) => r.userId === USER_A)).toBe(true)
   })
 
-  it('does not return another user\'s rows', async () => {
+  it("does not return another user's rows", async () => {
     await upsertScheduleRows(db, USER_B, [
       { dayOfWeek: 1, startTime: '09:00', endTime: '17:00', isWorking: true },
     ])
@@ -66,7 +67,7 @@ describe('upsertScheduleRows', () => {
     expect(rows[0].isWorking).toBe(false)
   })
 
-  it('does not affect another user\'s row for the same day', async () => {
+  it("does not affect another user's row for the same day", async () => {
     await upsertScheduleRows(db, USER_A, [
       { dayOfWeek: 1, startTime: '09:00', endTime: '17:00', isWorking: true },
     ])

@@ -15,11 +15,25 @@ export function getUpcomingExceptions(db: PrismaClient, userId: string) {
   })
 }
 
-export function upsertException(db: PrismaClient, userId: string, data: ExceptionInput) {
+export function upsertException(
+  db: PrismaClient,
+  userId: string,
+  data: ExceptionInput,
+) {
   return db.scheduleException.upsert({
     where: { userId_date: { userId, date: data.date } },
-    create: { userId, date: data.date, isWorking: data.isWorking, startTime: data.startTime, endTime: data.endTime },
-    update: { isWorking: data.isWorking, startTime: data.startTime, endTime: data.endTime },
+    create: {
+      userId,
+      date: data.date,
+      isWorking: data.isWorking,
+      startTime: data.startTime,
+      endTime: data.endTime,
+    },
+    update: {
+      isWorking: data.isWorking,
+      startTime: data.startTime,
+      endTime: data.endTime,
+    },
   })
 }
 

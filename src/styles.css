@@ -1,5 +1,4 @@
-
-@import "tailwindcss";
+@import 'tailwindcss';
 
 * {
   box-sizing: border-box;
@@ -16,4 +15,3 @@ body {
   background-color: theme(--color-zinc-950);
   color: theme(--color-zinc-50);
 }
-

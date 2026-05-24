@@ -58,9 +58,7 @@ function Home() {
 
       <section className="border-t border-zinc-800 px-8 py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-16 text-center text-3xl font-bold">
-            How it works
-          </h2>
+          <h2 className="mb-16 text-center text-3xl font-bold">How it works</h2>
           <div className="grid gap-12 sm:grid-cols-3">
             <Step
               number="01"
