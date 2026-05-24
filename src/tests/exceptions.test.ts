@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createTestDb, insertTestUser, type TestDb } from './helpers/db.ts'
-import { getUpcomingExceptions, upsertException, deleteException } from '#/db/exceptions.ts'
+import { createTestDb, insertTestUser } from './helpers/db.ts'
+import type { TestDb } from './helpers/db.ts'
+import {
+  getUpcomingExceptions,
+  upsertException,
+  deleteException,
+} from '#/db/exceptions.ts'
 
 const USER_A = 'user-a'
 const USER_B = 'user-b'
@@ -17,8 +22,18 @@ beforeEach(async () => {
 
 describe('getUpcomingExceptions', () => {
   it('returns exceptions on or after today', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
-    await upsertException(db, USER_A, { date: PAST, isWorking: false, startTime: null, endTime: null })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
+    await upsertException(db, USER_A, {
+      date: PAST,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
 
     const rows = await getUpcomingExceptions(db, USER_A)
 
@@ -27,8 +42,18 @@ describe('getUpcomingExceptions', () => {
   })
 
   it('only returns exceptions for the given user', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
-    await upsertException(db, USER_B, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
+    await upsertException(db, USER_B, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
 
     const rows = await getUpcomingExceptions(db, USER_A)
 
@@ -37,9 +62,24 @@ describe('getUpcomingExceptions', () => {
   })
 
   it('returns results ordered by date ascending', async () => {
-    await upsertException(db, USER_A, { date: '2099-06-01', isWorking: false, startTime: null, endTime: null })
-    await upsertException(db, USER_A, { date: '2099-03-01', isWorking: false, startTime: null, endTime: null })
-    await upsertException(db, USER_A, { date: '2099-09-01', isWorking: false, startTime: null, endTime: null })
+    await upsertException(db, USER_A, {
+      date: '2099-06-01',
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
+    await upsertException(db, USER_A, {
+      date: '2099-03-01',
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
+    await upsertException(db, USER_A, {
+      date: '2099-09-01',
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
 
     const rows = await getUpcomingExceptions(db, USER_A)
     const dates = rows.map((r) => r.date)
@@ -50,7 +90,12 @@ describe('getUpcomingExceptions', () => {
 
 describe('upsertException', () => {
   it('inserts a day-off exception', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
 
     const rows = await getUpcomingExceptions(db, USER_A)
 
@@ -61,7 +106,12 @@ describe('upsertException', () => {
   })
 
   it('inserts a custom-hours exception', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: true, startTime: '10:00', endTime: '14:00' })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: true,
+      startTime: '10:00',
+      endTime: '14:00',
+    })
 
     const rows = await getUpcomingExceptions(db, USER_A)
 
@@ -71,8 +121,18 @@ describe('upsertException', () => {
   })
 
   it('replaces an existing exception for the same date (upsert)', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: true, startTime: '09:00', endTime: '17:00' })
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: true,
+      startTime: '09:00',
+      endTime: '17:00',
+    })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
 
     const rows = await getUpcomingExceptions(db, USER_A)
 
@@ -80,9 +140,19 @@ describe('upsertException', () => {
     expect(rows[0].isWorking).toBe(false)
   })
 
-  it('does not affect another user\'s exception on the same date', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: true, startTime: '09:00', endTime: '17:00' })
-    await upsertException(db, USER_B, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
+  it("does not affect another user's exception on the same date", async () => {
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: true,
+      startTime: '09:00',
+      endTime: '17:00',
+    })
+    await upsertException(db, USER_B, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
 
     const rowsA = await getUpcomingExceptions(db, USER_A)
     expect(rowsA[0].isWorking).toBe(true)
@@ -91,7 +161,12 @@ describe('upsertException', () => {
 
 describe('deleteException', () => {
   it('removes the exception', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
     const [exception] = await getUpcomingExceptions(db, USER_A)
 
     await deleteException(db, USER_A, exception.id)
@@ -100,8 +175,13 @@ describe('deleteException', () => {
     expect(rows).toHaveLength(0)
   })
 
-  it('does not delete another user\'s exception', async () => {
-    await upsertException(db, USER_A, { date: FUTURE, isWorking: false, startTime: null, endTime: null })
+  it("does not delete another user's exception", async () => {
+    await upsertException(db, USER_A, {
+      date: FUTURE,
+      isWorking: false,
+      startTime: null,
+      endTime: null,
+    })
     const [exceptionA] = await getUpcomingExceptions(db, USER_A)
 
     await deleteException(db, USER_B, exceptionA.id)

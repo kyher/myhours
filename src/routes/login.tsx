@@ -30,10 +30,13 @@ function LoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error } = await authClient.signIn.email({ email, password })
+    const { error: signInError } = await authClient.signIn.email({
+      email,
+      password,
+    })
     setLoading(false)
-    if (error) {
-      setError(error.message ?? 'Login failed')
+    if (signInError) {
+      setError(signInError.message ?? 'Login failed')
       return
     }
     navigate({ to: '/settings' })

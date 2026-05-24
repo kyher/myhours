@@ -20,7 +20,9 @@ const getProfile = createServerFn({ method: 'GET' })
     const profile = await db.user.findUnique({ where: { username } })
     if (!profile) return null
 
-    const scheduleRows = await db.schedule.findMany({ where: { userId: profile.id } })
+    const scheduleRows = await db.schedule.findMany({
+      where: { userId: profile.id },
+    })
     const exceptions = await getUpcomingExceptions(db, profile.id)
 
     return { profile, schedule: scheduleRows, exceptions }
@@ -43,7 +45,11 @@ export const Route = createFileRoute('/profile/$username')({
 function formatExceptionDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number)
   const d = new Date(year, month - 1, day)
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
 }
 
 function ProfilePage() {

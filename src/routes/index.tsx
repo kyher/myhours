@@ -9,7 +9,7 @@ function Home() {
   const { data: session } = authClient.useSession()
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+    <div className="min-h-screen text-zinc-50">
       <section className="flex flex-col items-center justify-center px-8 py-32 text-center">
         <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
           Know when your
@@ -58,9 +58,7 @@ function Home() {
 
       <section className="border-t border-zinc-800 px-8 py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-16 text-center text-3xl font-bold">
-            How it works
-          </h2>
+          <h2 className="mb-16 text-center text-3xl font-bold">How it works</h2>
           <div className="grid gap-12 sm:grid-cols-3">
             <Step
               number="01"

@@ -1,8 +1,12 @@
-import { createFileRoute, redirect, Link, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  redirect,
+  Link,
+  useRouter,
+} from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { auth } from '#/lib/auth'
-import { authClient } from '#/lib/auth-client'
 import { getRequest } from '@tanstack/react-start/server'
 import { db } from '#/db'
 import type { Schedule } from '@prisma/client'
@@ -10,9 +14,10 @@ import {
   getUpcomingExceptions,
   upsertException,
   deleteException,
-  type ExceptionInput,
 } from '#/db/exceptions'
-import { getSchedule, upsertScheduleRows, type ScheduleRowInput } from '#/db/schedule'
+import type { ExceptionInput } from '#/db/exceptions'
+import { getSchedule, upsertScheduleRows } from '#/db/schedule'
+import type { ScheduleRowInput } from '#/db/schedule'
 
 type ScheduleRow = ScheduleRowInput
 
@@ -76,10 +81,20 @@ export const Route = createFileRoute('/settings')({
 })
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]
 
 function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
-  const byDay = Object.fromEntries(dbRows.map((r) => [r.dayOfWeek, r]))
+  const byDay: Partial<Record<number, Schedule>> = Object.fromEntries(
+    dbRows.map((r) => [r.dayOfWeek, r]),
+  )
   return DAY_ORDER.map((day) => ({
     dayOfWeek: day,
     startTime: byDay[day]?.startTime ?? '09:00',
@@ -91,7 +106,11 @@ function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
 function formatExceptionDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number)
   const d = new Date(year, month - 1, day)
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
 }
 
 function SettingsPage() {
@@ -110,7 +129,9 @@ function SettingsPage() {
   const [addingException, setAddingException] = useState(false)
 
   const updateRow = (dayOfWeek: number, patch: Partial<ScheduleRow>) => {
-    setRows((prev) => prev.map((r) => (r.dayOfWeek === dayOfWeek ? { ...r, ...patch } : r)))
+    setRows((prev) =>
+      prev.map((r) => (r.dayOfWeek === dayOfWeek ? { ...r, ...patch } : r)),
+    )
     setSaved(false)
   }
 
@@ -154,12 +175,12 @@ function SettingsPage() {
   return (
     <div className="mx-auto mt-16 max-w-lg px-4">
       <h1 className="mb-6 text-2xl font-bold">Settings</h1>
-      <div className="mb-8 rounded border p-4">
-        <p className="text-sm text-gray-500">Signed in as</p>
-        <p className="font-medium">{session.user.email}</p>
-        <p className="text-sm text-gray-600">@{session.user.username}</p>
-      </div>
-      <div className="mb-8">
+      <div className="mb-8 bg-linear-to-r from-emerald-700 to-emerald-900 p-4 rounded flex items-center place-content-between">
+        <div>
+          <p className="text-sm">Signed in as</p>
+          <p className="font-medium">{session.user.email}</p>
+          <p className="text-sm text-white">@{session.user.username}</p>
+        </div>
         <Link
           to="/profile/$username"
           params={{ username: session.user.username ?? '' }}
@@ -168,11 +189,12 @@ function SettingsPage() {
           View my public profile →
         </Link>
       </div>
-      <div className="mb-8">
+      <div className="mb-8"></div>
+      <div className="mb-8 bg-emerald-900 p-4 rounded">
         <h2 className="mb-4 text-lg font-semibold">Working hours</h2>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-gray-500">
+            <tr className="border-b text-left">
               <th className="pb-2 font-medium">Day</th>
               <th className="pb-2 font-medium">Working</th>
               <th className="pb-2 font-medium">Start</th>
@@ -187,7 +209,9 @@ function SettingsPage() {
                   <input
                     type="checkbox"
                     checked={row.isWorking}
-                    onChange={(e) => updateRow(row.dayOfWeek, { isWorking: e.target.checked })}
+                    onChange={(e) =>
+                      updateRow(row.dayOfWeek, { isWorking: e.target.checked })
+                    }
                     className="cursor-pointer"
                   />
                 </td>
@@ -196,7 +220,9 @@ function SettingsPage() {
                     type="time"
                     value={row.startTime}
                     disabled={!row.isWorking}
-                    onChange={(e) => updateRow(row.dayOfWeek, { startTime: e.target.value })}
+                    onChange={(e) =>
+                      updateRow(row.dayOfWeek, { startTime: e.target.value })
+                    }
                     className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:text-gray-400"
                   />
                 </td>
@@ -205,7 +231,9 @@ function SettingsPage() {
                     type="time"
                     value={row.endTime}
                     disabled={!row.isWorking}
-                    onChange={(e) => updateRow(row.dayOfWeek, { endTime: e.target.value })}
+                    onChange={(e) =>
+                      updateRow(row.dayOfWeek, { endTime: e.target.value })
+                    }
                     className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:text-gray-400"
                   />
                 </td>
@@ -225,12 +253,12 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-8 bg-emerald-900 p-4 rounded">
         <h2 className="mb-4 text-lg font-semibold">Upcoming exceptions</h2>
         {exceptionRows.length > 0 && (
           <table className="mb-4 w-full text-sm">
             <thead>
-              <tr className="border-b text-left text-gray-500">
+              <tr className="border-b text-left">
                 <th className="pb-2 font-medium">Date</th>
                 <th className="pb-2 font-medium">Hours</th>
                 <th className="pb-2 font-medium"></th>
@@ -258,7 +286,7 @@ function SettingsPage() {
         )}
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1 block text-xs text-gray-500">Date</label>
+            <label className="mb-1 block text-xs">Date</label>
             <input
               type="date"
               value={newDate}
@@ -280,7 +308,7 @@ function SettingsPage() {
             </label>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-500">Start</label>
+            <label className="mb-1 block text-xs">Start</label>
             <input
               type="time"
               value={newStartTime}
@@ -290,7 +318,7 @@ function SettingsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-500">End</label>
+            <label className="mb-1 block text-xs">End</label>
             <input
               type="time"
               value={newEndTime}
@@ -308,13 +336,6 @@ function SettingsPage() {
           </button>
         </div>
       </div>
-
-      <button
-        onClick={() => authClient.signOut()}
-        className="mt-8 text-sm text-red-600 hover:underline"
-      >
-        Sign out
-      </button>
     </div>
   )
 }
