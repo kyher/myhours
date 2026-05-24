@@ -1,8 +1,12 @@
-import { createFileRoute, redirect, Link, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  redirect,
+  Link,
+  useRouter,
+} from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useState } from 'react'
 import { auth } from '#/lib/auth'
-import { authClient } from '#/lib/auth-client'
 import { getRequest } from '@tanstack/react-start/server'
 import { db } from '#/db'
 import type { Schedule } from '@prisma/client'
@@ -10,9 +14,10 @@ import {
   getUpcomingExceptions,
   upsertException,
   deleteException,
-  type ExceptionInput,
 } from '#/db/exceptions'
-import { getSchedule, upsertScheduleRows, type ScheduleRowInput } from '#/db/schedule'
+import type { ExceptionInput } from '#/db/exceptions'
+import { getSchedule, upsertScheduleRows } from '#/db/schedule'
+import type { ScheduleRowInput } from '#/db/schedule'
 
 type ScheduleRow = ScheduleRowInput
 
@@ -76,7 +81,15 @@ export const Route = createFileRoute('/settings')({
 })
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+]
 
 function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
   const byDay = Object.fromEntries(dbRows.map((r) => [r.dayOfWeek, r]))
@@ -91,7 +104,11 @@ function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
 function formatExceptionDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number)
   const d = new Date(year, month - 1, day)
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
 }
 
 function SettingsPage() {
@@ -110,7 +127,9 @@ function SettingsPage() {
   const [addingException, setAddingException] = useState(false)
 
   const updateRow = (dayOfWeek: number, patch: Partial<ScheduleRow>) => {
-    setRows((prev) => prev.map((r) => (r.dayOfWeek === dayOfWeek ? { ...r, ...patch } : r)))
+    setRows((prev) =>
+      prev.map((r) => (r.dayOfWeek === dayOfWeek ? { ...r, ...patch } : r)),
+    )
     setSaved(false)
   }
 
@@ -187,7 +206,9 @@ function SettingsPage() {
                   <input
                     type="checkbox"
                     checked={row.isWorking}
-                    onChange={(e) => updateRow(row.dayOfWeek, { isWorking: e.target.checked })}
+                    onChange={(e) =>
+                      updateRow(row.dayOfWeek, { isWorking: e.target.checked })
+                    }
                     className="cursor-pointer"
                   />
                 </td>
@@ -196,7 +217,9 @@ function SettingsPage() {
                     type="time"
                     value={row.startTime}
                     disabled={!row.isWorking}
-                    onChange={(e) => updateRow(row.dayOfWeek, { startTime: e.target.value })}
+                    onChange={(e) =>
+                      updateRow(row.dayOfWeek, { startTime: e.target.value })
+                    }
                     className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:text-gray-400"
                   />
                 </td>
@@ -205,7 +228,9 @@ function SettingsPage() {
                     type="time"
                     value={row.endTime}
                     disabled={!row.isWorking}
-                    onChange={(e) => updateRow(row.dayOfWeek, { endTime: e.target.value })}
+                    onChange={(e) =>
+                      updateRow(row.dayOfWeek, { endTime: e.target.value })
+                    }
                     className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:text-gray-400"
                   />
                 </td>
@@ -308,13 +333,6 @@ function SettingsPage() {
           </button>
         </div>
       </div>
-
-      <button
-        onClick={() => authClient.signOut()}
-        className="mt-8 text-sm text-red-600 hover:underline"
-      >
-        Sign out
-      </button>
     </div>
   )
 }
