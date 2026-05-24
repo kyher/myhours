@@ -173,10 +173,10 @@ function SettingsPage() {
   return (
     <div className="mx-auto mt-16 max-w-lg px-4">
       <h1 className="mb-6 text-2xl font-bold">Settings</h1>
-      <div className="mb-8 rounded border p-4">
-        <p className="text-sm text-gray-500">Signed in as</p>
+      <div className="mb-8 bg-emerald-900/30 p-4 rounded border">
+        <p className="text-sm">Signed in as</p>
         <p className="font-medium">{session.user.email}</p>
-        <p className="text-sm text-gray-600">@{session.user.username}</p>
+        <p className="text-sm text-white">@{session.user.username}</p>
       </div>
       <div className="mb-8">
         <Link
@@ -187,7 +187,7 @@ function SettingsPage() {
           View my public profile →
         </Link>
       </div>
-      <div className="mb-8">
+      <div className="mb-8 bg-emerald-900/30 p-4 rounded border">
         <h2 className="mb-4 text-lg font-semibold">Working hours</h2>
         <table className="w-full text-sm">
           <thead>
@@ -250,7 +250,7 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-8 bg-emerald-900/30 p-4 rounded border">
         <h2 className="mb-4 text-lg font-semibold">Upcoming exceptions</h2>
         {exceptionRows.length > 0 && (
           <table className="mb-4 w-full text-sm">

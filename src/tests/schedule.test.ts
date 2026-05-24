@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createTestDb, insertTestUser  } from './helpers/db.ts'
-import type {TestDb} from './helpers/db.ts';
+import { createTestDb, insertTestUser } from './helpers/db.ts'
+import type { TestDb } from './helpers/db.ts'
 import { getSchedule, upsertScheduleRows } from '#/db/schedule.ts'
 
 const USER_A = 'user-a'

@@ -46,8 +46,8 @@ function RootComponent() {
 
   return (
     <>
-      <nav className="flex items-center gap-4 border-b border-zinc-800 bg-zinc-950 px-8 py-4 text-sm text-zinc-50">
-        <Link to="/" className="font-semibold text-emerald-500">
+      <nav className="flex items-center gap-4 border-b border-zinc-800 px-8 py-4 text-sm text-zinc-50">
+        <Link to="/" className="font-semibold text-emerald-500 text-xl">
           MyHours
         </Link>
         <div className="ml-auto flex items-center gap-4">
