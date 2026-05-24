@@ -30,7 +30,10 @@ function LoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error: signInError } = await authClient.signIn.email({ email, password })
+    const { error: signInError } = await authClient.signIn.email({
+      email,
+      password,
+    })
     setLoading(false)
     if (signInError) {
       setError(signInError.message ?? 'Login failed')

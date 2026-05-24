@@ -12,6 +12,6 @@ body,
 
 body {
   margin: 0;
-  background-color: theme(--color-zinc-950);
+  background-color: theme(--color-zinc-900);
   color: theme(--color-zinc-50);
 }

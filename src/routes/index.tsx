@@ -9,7 +9,7 @@ function Home() {
   const { data: session } = authClient.useSession()
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+    <div className="min-h-screen text-zinc-50">
       <section className="flex flex-col items-center justify-center px-8 py-32 text-center">
         <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
           Know when your

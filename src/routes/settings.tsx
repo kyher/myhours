@@ -92,7 +92,9 @@ const DAY_NAMES = [
 ]
 
 function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
-  const byDay: Partial<Record<number, Schedule>> = Object.fromEntries(dbRows.map((r) => [r.dayOfWeek, r]))
+  const byDay: Partial<Record<number, Schedule>> = Object.fromEntries(
+    dbRows.map((r) => [r.dayOfWeek, r]),
+  )
   return DAY_ORDER.map((day) => ({
     dayOfWeek: day,
     startTime: byDay[day]?.startTime ?? '09:00',
@@ -173,12 +175,12 @@ function SettingsPage() {
   return (
     <div className="mx-auto mt-16 max-w-lg px-4">
       <h1 className="mb-6 text-2xl font-bold">Settings</h1>
-      <div className="mb-8 bg-emerald-900/30 p-4 rounded border">
-        <p className="text-sm">Signed in as</p>
-        <p className="font-medium">{session.user.email}</p>
-        <p className="text-sm text-white">@{session.user.username}</p>
-      </div>
-      <div className="mb-8">
+      <div className="mb-8 bg-linear-to-r from-emerald-700 to-emerald-900 p-4 rounded flex items-center place-content-between">
+        <div>
+          <p className="text-sm">Signed in as</p>
+          <p className="font-medium">{session.user.email}</p>
+          <p className="text-sm text-white">@{session.user.username}</p>
+        </div>
         <Link
           to="/profile/$username"
           params={{ username: session.user.username ?? '' }}
@@ -187,11 +189,12 @@ function SettingsPage() {
           View my public profile →
         </Link>
       </div>
-      <div className="mb-8 bg-emerald-900/30 p-4 rounded border">
+      <div className="mb-8"></div>
+      <div className="mb-8 bg-emerald-900 p-4 rounded">
         <h2 className="mb-4 text-lg font-semibold">Working hours</h2>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-gray-500">
+            <tr className="border-b text-left">
               <th className="pb-2 font-medium">Day</th>
               <th className="pb-2 font-medium">Working</th>
               <th className="pb-2 font-medium">Start</th>
@@ -250,12 +253,12 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div className="mb-8 bg-emerald-900/30 p-4 rounded border">
+      <div className="mb-8 bg-emerald-900 p-4 rounded">
         <h2 className="mb-4 text-lg font-semibold">Upcoming exceptions</h2>
         {exceptionRows.length > 0 && (
           <table className="mb-4 w-full text-sm">
             <thead>
-              <tr className="border-b text-left text-gray-500">
+              <tr className="border-b text-left">
                 <th className="pb-2 font-medium">Date</th>
                 <th className="pb-2 font-medium">Hours</th>
                 <th className="pb-2 font-medium"></th>
@@ -283,7 +286,7 @@ function SettingsPage() {
         )}
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1 block text-xs text-gray-500">Date</label>
+            <label className="mb-1 block text-xs">Date</label>
             <input
               type="date"
               value={newDate}
@@ -305,7 +308,7 @@ function SettingsPage() {
             </label>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-500">Start</label>
+            <label className="mb-1 block text-xs">Start</label>
             <input
               type="time"
               value={newStartTime}
@@ -315,7 +318,7 @@ function SettingsPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-500">End</label>
+            <label className="mb-1 block text-xs">End</label>
             <input
               type="time"
               value={newEndTime}

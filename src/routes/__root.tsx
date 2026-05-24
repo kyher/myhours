@@ -46,7 +46,7 @@ function RootComponent() {
 
   return (
     <>
-      <nav className="flex items-center gap-4 border-b border-zinc-800 px-8 py-4 text-sm text-zinc-50">
+      <nav className="flex items-center gap-4 border-b border-zinc-800 px-8 py-4 text-sm text-zinc-50 bg-zinc-800">
         <Link to="/" className="font-semibold text-emerald-500 text-xl">
           MyHours
         </Link>
