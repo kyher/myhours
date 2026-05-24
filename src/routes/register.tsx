@@ -31,15 +31,15 @@ function RegisterPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error } = await authClient.signUp.email({
+    const { error: signUpError } = await authClient.signUp.email({
       email,
       password,
       username,
       name: username,
     })
     setLoading(false)
-    if (error) {
-      setError(error.message ?? 'Registration failed')
+    if (signUpError) {
+      setError(signUpError.message ?? 'Registration failed')
       return
     }
     navigate({ to: '/settings' })

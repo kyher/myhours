@@ -92,7 +92,7 @@ const DAY_NAMES = [
 ]
 
 function buildInitialRows(dbRows: Schedule[]): ScheduleRow[] {
-  const byDay = Object.fromEntries(dbRows.map((r) => [r.dayOfWeek, r]))
+  const byDay: Partial<Record<number, Schedule>> = Object.fromEntries(dbRows.map((r) => [r.dayOfWeek, r]))
   return DAY_ORDER.map((day) => ({
     dayOfWeek: day,
     startTime: byDay[day]?.startTime ?? '09:00',
