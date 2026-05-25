@@ -20,6 +20,10 @@ A User's standard weekly working pattern. Stored as up to 7 rows (one per day-of
 
 A specific calendar date that overrides the User's standard Schedule. Stores a date (YYYY-MM-DD), optional start/end times, and an `isWorking` flag. Used for holidays, irregular hours, etc.
 
+## Availability Status
+
+A real-time derived state shown on a User's Profile, computed from their Schedule and any Schedule Exception for the current day. Three possible states: **Available** (currently within working hours), **Not available** (working day but outside hours, or off today), **No schedule** (no Schedule rows exist). Displayed in the visitor's local timezone, with a visible disclaimer to that effect.
+
 ## Settings
 
 The private page at `/settings` where an authenticated User manages their Profile and Schedule. Requires authentication; unauthenticated visitors are redirected to `/login`.
