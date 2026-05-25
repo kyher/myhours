@@ -3,6 +3,8 @@ import { createServerFn } from '@tanstack/react-start'
 
 import { db } from '#/db'
 import { getUpcomingExceptions } from '#/db/exceptions'
+import type { AvailabilityStatus } from '#/lib/availability'
+import { getAvailabilityStatus } from '#/lib/availability'
 
 const DAY_NAMES = [
   'Sunday',
@@ -13,6 +15,7 @@ const DAY_NAMES = [
   'Friday',
   'Saturday',
 ]
+const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
 const getProfile = createServerFn({ method: 'GET' })
   .inputValidator((username: string) => username)
@@ -52,10 +55,56 @@ function formatExceptionDate(dateStr: string): string {
   })
 }
 
+function AvailabilityHero({ status }: { status: AvailabilityStatus }) {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+  if (status.kind === 'no-schedule') {
+    return (
+      <div className="mb-8 rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
+        <p className="text-sm text-zinc-400">No schedule set yet.</p>
+      </div>
+    )
+  }
+
+  const available = status.kind === 'available'
+
+  const reason =
+    status.kind === 'available'
+      ? `${status.start} – ${status.end}`
+      : status.kind === 'before-hours'
+        ? `Working from ${status.start}`
+        : status.kind === 'after-hours'
+          ? `Finished at ${status.end}`
+          : 'Off today'
+
+  return (
+    <div
+      className={`mb-8 rounded-lg border px-5 py-4 ${
+        available
+          ? 'border-emerald-700 bg-emerald-950/60'
+          : 'border-zinc-700 bg-zinc-800/50'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-2 w-2 rounded-full ${available ? 'bg-emerald-400' : 'bg-zinc-500'}`}
+        />
+        <span
+          className={`font-semibold ${available ? 'text-emerald-400' : 'text-zinc-300'}`}
+        >
+          {available ? 'Available now' : 'Not available'}
+        </span>
+      </div>
+      <p className="mt-1 pl-4 text-sm">{reason}</p>
+      <p className="mt-3 text-xs">Times shown in your local timezone · {tz}</p>
+    </div>
+  )
+}
+
 function ProfilePage() {
   const { profile, schedule: scheduleRows, exceptions } = Route.useLoaderData()
 
-  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
+  const status = getAvailabilityStatus(scheduleRows, exceptions)
   const sorted = [...scheduleRows].sort(
     (a, b) => DAY_ORDER.indexOf(a.dayOfWeek) - DAY_ORDER.indexOf(b.dayOfWeek),
   )
@@ -63,47 +112,60 @@ function ProfilePage() {
   return (
     <div className="mx-auto mt-16 max-w-lg px-4">
       <h1 className="mb-1 text-3xl font-bold">@{profile.username}</h1>
-      <p className="mb-8 text-sm text-gray-500">{profile.name}</p>
+      <p className="mb-6 text-sm text-zinc-500">{profile.name}</p>
 
-      {sorted.length === 0 ? (
-        <p className="text-sm text-gray-400">No schedule set yet.</p>
-      ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-gray-500">
-              <th className="pb-2 font-medium">Day</th>
-              <th className="pb-2 font-medium">Hours</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((row) => (
-              <tr key={row.dayOfWeek} className="border-b last:border-0">
-                <td className="py-2">{DAY_NAMES[row.dayOfWeek]}</td>
-                <td className="py-2">
-                  {row.isWorking ? `${row.startTime} – ${row.endTime}` : 'Off'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <AvailabilityHero status={status} />
+
+      {sorted.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Schedule
+          </h2>
+          <table className="w-full text-sm">
+            <tbody>
+              {sorted.map((row) => (
+                <tr
+                  key={row.dayOfWeek}
+                  className="border-b border-zinc-800 last:border-0"
+                >
+                  <td className="py-2 text-zinc-400">
+                    {DAY_NAMES[row.dayOfWeek]}
+                  </td>
+                  <td className="py-2 text-right">
+                    {row.isWorking ? (
+                      `${row.startTime} – ${row.endTime}`
+                    ) : (
+                      <span className="text-zinc-600">Off</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {exceptions.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-4 text-lg font-semibold">Upcoming exceptions</h2>
+        <div>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Upcoming exceptions
+          </h2>
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-gray-500">
-                <th className="pb-2 font-medium">Date</th>
-                <th className="pb-2 font-medium">Hours</th>
-              </tr>
-            </thead>
             <tbody>
               {exceptions.map((ex) => (
-                <tr key={ex.id} className="border-b last:border-0">
-                  <td className="py-2">{formatExceptionDate(ex.date)}</td>
-                  <td className="py-2">
-                    {ex.isWorking ? `${ex.startTime} – ${ex.endTime}` : 'Off'}
+                <tr
+                  key={ex.id}
+                  className="border-b border-zinc-800 last:border-0"
+                >
+                  <td className="py-2 text-zinc-400">
+                    {formatExceptionDate(ex.date)}
+                  </td>
+                  <td className="py-2 text-right">
+                    {ex.isWorking ? (
+                      `${ex.startTime} – ${ex.endTime}`
+                    ) : (
+                      <span className="text-zinc-600">Off</span>
+                    )}
                   </td>
                 </tr>
               ))}
