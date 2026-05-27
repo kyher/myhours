@@ -7,7 +7,7 @@ import { db } from '#/db'
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   secret: process.env.BETTER_AUTH_SECRET,
-  database: prismaAdapter(db, { provider: 'sqlite' }),
+  database: prismaAdapter(db, { provider: 'postgresql' }),
   emailAndPassword: { enabled: true },
   plugins: [username()],
 })
