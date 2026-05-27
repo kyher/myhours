@@ -1,3 +1,3 @@
 import { execSync } from 'node:child_process'
 
-execSync('npx prisma migrate deploy', { stdio: 'pipe' })
+execSync('pnpm exec prisma migrate deploy', { stdio: 'pipe' })
