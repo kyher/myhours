@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config'
+import { loadEnv } from 'vite'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -14,8 +15,6 @@ export default defineConfig({
     environment: 'node',
     fileParallelism: false,
     setupFiles: ['./src/tests/helpers/setup.ts'],
-    env: {
-      DATABASE_URL: 'file:test.db',
-    },
+    env: loadEnv('test', root, ''),
   },
 })
