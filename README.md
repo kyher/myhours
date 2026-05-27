@@ -6,6 +6,8 @@ To run this application:
 
 ```bash
 pnpm install
+docker compose up -d   # start Postgres
+pnpm db:migrate        # run migrations
 pnpm dev
 ```
 
